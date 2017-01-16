@@ -60,7 +60,7 @@ class Game:
         self.height = height
         self.hard = difficulty
         self.reset = False
-        self.speed = 0.05
+        self.speed = 0.5
         self.score = 0
         self.cooldown = self.speed
 
@@ -105,10 +105,11 @@ class Game:
                 newpos = Vector2(self.snake.pos.x - 1, self.snake.pos.y)
 
             self.snake = Snake(newpos, self.snake)
+            if not self.hard:
+                self.teleport(self.snake)
             if self.isdead(self.snake):
                 self.reset = True
             self.snake = self.snake.take(self.length)
-            self.teleport(self.snake)
             self.cooldown = self.speed
 
             if self.snake.pos.is_same(self.food):
@@ -119,16 +120,14 @@ class Game:
 
     def setfood(self):
         self.food = Vector2(random.randint(2, self.colloms - 3), random.randint(2, self.rows - 3))
+        if self.snake.exist(lambda x: x.is_same(self.food)):
+            self.setfood()
 
     def isdead(self, snake):
-        if self.hard:
-            if snake.length() > 1:
-                return snake.skip(1).exist(lambda x: x.is_same(snake.pos)) or (snake.pos.x < 2 or snake.pos.x > self.colloms-3) or (snake.pos.y < 2 or snake.pos.y > self.rows -3)
-            return (snake.pos.x < 2 or snake.pos.x > self.colloms-3) or (snake.pos.y < 2 or snake.pos.y > self.rows -3)
-        else:
-            if snake.length() > 1:
-                return snake.skip(1).exist(lambda x: x.is_same(snake.pos))
-            return False
+        if snake.length() > 1:
+            return snake.skip(1).exist(lambda x: x.is_same(snake.pos)) or (snake.pos.x < 2 or snake.pos.x > self.colloms-3) or (snake.pos.y < 2 or snake.pos.y > self.rows -3)
+        return (snake.pos.x < 2 or snake.pos.x > self.colloms-3) or (snake.pos.y < 2 or snake.pos.y > self.rows -3)
+        return False
 
     def teleport(self, snake):
             if snake.pos.x == self.colloms -2:
